@@ -180,7 +180,7 @@ fun DataScreen(
                     if (isConnected) {
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "샘플링 레이트 \n EEG 250Hz \n PPG 50Hz \n ACC 25Hz",
+                            text = "샘플링 레이트 : \n EEG 250Hz \n PPG 50Hz \n ACC 25Hz",
                             fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -540,6 +540,12 @@ fun DataScreen(
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                     
+                                    Text(
+                                        text = "저장 경로 : 내 파일 -> 내장 저장공간 -> Download -> LinkBand",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    
                                     if (isRecording) {
                         Button(
                                             onClick = { onStopRecording() },
@@ -568,7 +574,7 @@ fun DataScreen(
                                                 modifier = Modifier.size(12.dp)
                                             )
                             Text(
-                                                text = "데이터를 기록하고 있습니다...",
+                                                text = "데이터가 실시간으로 CSV 파일에 저장되고 있습니다",
                                                 style = MaterialTheme.typography.bodySmall,
                                                 color = MaterialTheme.colorScheme.error
                                             )
@@ -584,7 +590,7 @@ fun DataScreen(
                                                 modifier = Modifier.size(16.dp)
                                             )
                                             Spacer(modifier = Modifier.width(4.dp))
-                                            Text("기록 시작")
+                                            Text("CSV 기록 시작")
                                         }
                                     }
                                 }
