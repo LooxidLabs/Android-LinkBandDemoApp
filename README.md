@@ -1,6 +1,6 @@
 # Android-LinkBandDemoApp
 
-LooxidLabs LinkBand 디바이스와의 Bluetooth 연결 및 센서 데이터 수집을 시연하는 Android 데모 앱입니다.
+LooxidLabs LinkBand 디바이스와의 Bluetooth 연결 및 센서 데이터 모니터링을 시연하는 Android 데모 앱입니다.
 
 ## 주요 기능
 
@@ -9,7 +9,7 @@ LooxidLabs LinkBand 디바이스와의 Bluetooth 연결 및 센서 데이터 수
 - 자동 재연결 기능
 - 연결 상태 실시간 모니터링
 
-### 📊 센서 데이터 수집
+### 📊 센서 데이터 모니터링
 
 #### EEG (뇌전도)
 - 2채널 원시 신호(raw data)
@@ -26,9 +26,9 @@ LooxidLabs LinkBand 디바이스와의 Bluetooth 연결 및 센서 데이터 수
 #### 배터리
 - 잔량 모니터링 기능
 
-### 📈 배치 데이터 수집
-- 샘플 수 기반 수집
-- 시간 기반 수집 (초/분)
+### 📈 배치 데이터 모니터링
+- 샘플 수 기반 모니터링
+- 시간 기반 모니터링 (초/분)
 - 센서별 개별 설정
 - 실시간 모니터링
 
@@ -44,21 +44,26 @@ LooxidLabs LinkBand 디바이스와의 Bluetooth 연결 및 센서 데이터 수
 ## 프로젝트 구조
 
 ```
-AndroidLinkBandDemoApp/
-├── app/                          # 메인 앱 모듈
-│   ├── src/main/
-│   │   ├── java/                 # Kotlin 소스 코드
-│   │   │   ├── MainActivity.kt   # 메인 액티비티
-│   │   │   ├── adapters/         # SDK 어댑터 레이어
-│   │   │   ├── viewmodels/       # MVVM 뷰모델
-│   │   │   ├── repositories/     # 데이터 레포지토리
-│   │   │   └── utils/            # 유틸리티 클래스
-│   │   ├── res/                  # 리소스 파일
-│   │   └── AndroidManifest.xml   # 앱 매니페스트
-│   └── build.gradle              # 앱 모듈 빌드 설정
-├── gradle.properties             # 프로젝트 설정
-├── build.gradle                  # 루트 빌드 설정
-└── settings.gradle               # 프로젝트 설정
+app/                          # 메인 앱 모듈
+├── src/main/
+│   ├── java/com/example/test/  # Kotlin 소스 코드
+│   │   ├── MainActivity.kt     # 메인 액티비티
+│   │   └── ui/                 # UI 컴포넌트
+│   │       ├── DataScreen.kt   # 센서 데이터 화면
+│   │       ├── ScanScreen.kt   # Bluetooth 스캔 화면
+│   │       ├── CsvViewerScreen.kt # CSV 뷰어 화면
+│   │       └── theme/          # UI 테마
+│   │           ├── Theme.kt    # 앱 테마 설정
+│   │           ├── Type.kt     # 타이포그래피
+│   │           └── Color.kt    # 색상 정의
+│   ├── res/                   # 리소스 파일
+│   │   ├── drawable/          # 이미지 리소스
+│   │   ├── mipmap-*/          # 앱 아이콘
+│   │   ├── values/            # 문자열, 색상 등
+│   │   └── xml/               # XML 리소스
+│   └── AndroidManifest.xml    # 앱 매니페스트
+├── build.gradle.kts           # 앱 모듈 빌드 설정
+└── proguard-rules.pro         # 코드 난독화 규칙
 ```
 
 ## 설치 및 실행
@@ -76,4 +81,4 @@ AndroidLinkBandDemoApp/
 1. 앱 실행 후 "스캔 시작" 버튼 터치
 2. 발견된 LinkBand 디바이스에 "연결" 버튼 터치
 3. 연결 완료 후 실시간 센서 데이터 확인
-4. 필요시 배치 데이터 수집 설정 후 기록 시작
+4. 필요시 배치 데이터 모니터링 설정 후 기록 시작

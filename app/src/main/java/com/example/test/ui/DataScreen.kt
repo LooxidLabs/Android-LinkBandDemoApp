@@ -28,15 +28,15 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Environment
 import androidx.core.content.FileProvider
-import com.example.linkbandsdk.SensorType
-import com.example.linkbandsdk.AccData
-import com.example.linkbandsdk.BatteryData
-import com.example.linkbandsdk.EegData
-import com.example.linkbandsdk.PpgData
-import com.example.linkbandsdk.AccelerometerMode
-import com.example.linkbandsdk.ProcessedAccData
-import com.example.linkbandsdk.CollectionMode
-import com.example.linkbandsdk.SensorBatchConfiguration
+import io.github.looxidlabs.sdkandroid.SensorType
+import io.github.looxidlabs.sdkandroid.AccData
+import io.github.looxidlabs.sdkandroid.BatteryData
+import io.github.looxidlabs.sdkandroid.EegData
+import io.github.looxidlabs.sdkandroid.PpgData
+import io.github.looxidlabs.sdkandroid.AccelerometerMode
+import io.github.looxidlabs.sdkandroid.ProcessedAccData
+import io.github.looxidlabs.sdkandroid.CollectionMode
+import io.github.looxidlabs.sdkandroid.SensorBatchConfiguration
 import kotlin.math.roundToInt
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.filled.Share
@@ -63,7 +63,7 @@ fun DataScreen(
     connectedDeviceName: String?,
     accelerometerMode: AccelerometerMode,
     processedAccData: List<ProcessedAccData>,
-    // 배치 수집 관련 매개변수들 추가
+    // 배치 모니터링 관련 매개변수들 추가
     selectedCollectionMode: CollectionMode,
     getSensorConfiguration: (SensorType) -> SensorBatchConfiguration?,
     onDisconnect: () -> Unit,
@@ -77,7 +77,7 @@ fun DataScreen(
     onShowFileList: () -> Unit,
     onToggleAutoReconnect: () -> Unit,
     onSetAccelerometerMode: (AccelerometerMode) -> Unit,
-    // 배치 수집 콜백 함수들 추가
+    // 배치 모니터링 콜백 함수들 추가
     onCollectionModeChange: (CollectionMode) -> Unit,
     onSampleCountChange: (SensorType, Int, String) -> Unit,
     onSecondsChange: (SensorType, Int, String) -> Unit,
@@ -97,10 +97,10 @@ fun DataScreen(
         }
     }
     
-    // 수집 시작 시점의 선택된 센서 스냅샷
+    // 센서 활성화 시점의 선택된 센서 스냅샷
     var startedSensors by remember { mutableStateOf<Set<SensorType>>(emptySet()) }
     
-    // 수집 시작/중지 시점에 스냅샷 갱신
+    // 센서 활성화/중지 시점에 스냅샷 갱신
     LaunchedEffect(isReceivingData) {
         if (isReceivingData) {
             startedSensors = selectedSensors.toSet()
@@ -249,45 +249,25 @@ fun DataScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Settings,
-                                contentDescription = "데이터 수집 설정",
+                                contentDescription = "데이터 모니터링 설정",
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(24.dp)
                             )
                             Text(
-                                text = "데이터 수집 설정",
+                                text = "데이터 모니터링 설정",
                                 style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.Medium
                             )
                         }
                         
-                        // 모니터링 상태 표시
-                        if (isReceivingData) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = "활성",
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(16.dp)
-                            )
-                            Text(
-                                    text = "수집 중",
-                                    style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.primary,
-                                    fontWeight = FontWeight.Medium
-                            )
-                            }
-                        }
                     }
                     
-                    // 수집 모드 선택
+                    // 모니터링 모드 선택
                     Column(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            text = "수집 모드",
+                            text = "모니터링 모드",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -340,8 +320,8 @@ fun DataScreen(
                     ) {
                         val title = when (selectedCollectionMode) {
                             CollectionMode.SAMPLE_COUNT -> "센서별 샘플 수 설정"
-                            CollectionMode.SECONDS -> "센서별 수집 시간 (초)"
-                            CollectionMode.MINUTES -> "센서별 수집 시간 (분)"
+                            CollectionMode.SECONDS -> "센서별 모니터링 시간 (초)"
+                            CollectionMode.MINUTES -> "센서별 모니터링 시간 (분)"
                         }
                         
                             Text(
@@ -481,7 +461,6 @@ fun DataScreen(
                     Column(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        // 데이터 수집 컨트롤
                         if (isReceivingData) {
                     Button(
                         onClick = {
@@ -502,7 +481,7 @@ fun DataScreen(
                                     modifier = Modifier.size(16.dp)
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text("수집 중지")
+                                Text("센서 비활성화")
                             }
                         } else {
                             Button(
@@ -516,11 +495,11 @@ fun DataScreen(
                                     modifier = Modifier.size(16.dp)
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text("수집 시작 (${selectedSensors.size}개)")
+                                Text("센서 활성화 (${selectedSensors.size}개)")
                             }
                         }
                     
-                        // 기록 컨트롤 (수집 시작 후 표시)
+                        // 기록 컨트롤 (센서 활성화 후 표시)
                     if (isReceivingData) {
                             Card(
                                 colors = CardDefaults.cardColors(
@@ -568,7 +547,7 @@ fun DataScreen(
                                             horizontalArrangement = Arrangement.spacedBy(4.dp)
                                         ) {
                                             Icon(
-                                                imageVector = Icons.Default.Check,
+                                                imageVector = Icons.Default.Favorite,
                                                 contentDescription = "기록 중",
                                                 tint = MaterialTheme.colorScheme.error,
                                                 modifier = Modifier.size(12.dp)
@@ -721,12 +700,12 @@ fun DataScreen(
         }
     }
     
-    // 수집 중지 경고 다이얼로그 (기록 중일 때)
+    // 센서 비활성화 경고 다이얼로그 (기록 중일 때)
     if (showStopCollectionDialog) {
         AlertDialog(
             onDismissRequest = { showStopCollectionDialog = false },
-            title = { Text("수집 중지 경고") },
-            text = { Text("현재 데이터 기록 중입니다. 수집을 중지하면 기록도 함께 중지됩니다. 계속하시겠습니까?") },
+            title = { Text("센서 비활성화 경고") },
+            text = { Text("현재 데이터 기록 중입니다. 센서를 비활성화하면 기록도 함께 중지됩니다. 계속하시겠습니까?") },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -756,7 +735,7 @@ fun DataScreen(
         AlertDialog(
             onDismissRequest = { showDisconnectDialog = false },
             title = { Text("연결 해제 경고") },
-            text = { Text("디바이스와의 연결을 해제하시겠습니까? 수집 중인 데이터와 기록이 중지됩니다.") },
+            text = { Text("디바이스와의 연결을 해제하시겠습니까? 모니터링 중인 데이터와 기록이 중지됩니다.") },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -1214,7 +1193,7 @@ private fun SensorCheckboxItem(
         
         if (isStarted) {
             Text(
-                text = "수집 중",
+                text = "활성화 중",
                 color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.bodySmall,
                 fontWeight = FontWeight.Bold

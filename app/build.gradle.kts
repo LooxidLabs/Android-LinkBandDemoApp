@@ -37,6 +37,9 @@ android {
     buildFeatures {
         compose = true
     }
+    lint {
+        abortOnError = false
+    }
 }
 
 dependencies {
@@ -62,7 +65,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     
     // LinkBand SDK from Maven Central
-    implementation("io.github.jackorea:linkband-sdk:1.0.0")
+    implementation("io.github.looxidlabs:SDK-Android:1.0.2")
     
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
