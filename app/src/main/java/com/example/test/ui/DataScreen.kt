@@ -553,7 +553,7 @@ fun DataScreen(
                                                 modifier = Modifier.size(12.dp)
                                             )
                             Text(
-                                                text = "데이터가 실시간으로 CSV 파일에 저장되고 있습니다",
+                                                text = "데이터가 실시간으로 CSV 및 JSON 파일에 저장되고 있습니다",
                                                 style = MaterialTheme.typography.bodySmall,
                                                 color = MaterialTheme.colorScheme.error
                                             )
@@ -569,7 +569,7 @@ fun DataScreen(
                                                 modifier = Modifier.size(16.dp)
                                             )
                                             Spacer(modifier = Modifier.width(4.dp))
-                                            Text("CSV 기록 시작")
+                                            Text("기록 시작")
                                         }
                                     }
                                 }
