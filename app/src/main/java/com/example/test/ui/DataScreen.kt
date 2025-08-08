@@ -450,7 +450,10 @@ fun DataScreen(
                             }
                             
                             Text(
-                                text = accelerometerMode.description,
+                                text = when (accelerometerMode) {
+                                    AccelerometerMode.RAW -> "중력을 포함한 원시 가속도 값"
+                                    AccelerometerMode.MOTION -> "중력을 제거한 움직임만 표시"
+                                },
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
