@@ -502,78 +502,83 @@ fun DataScreen(
                             }
                         }
                     
-                        // 기록 컨트롤 (센서 활성화 후 표시)
-                    if (isReceivingData) {
-                            Card(
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-                                )
+                        // 기록 컨트롤 (항상 표시, 활성화 상태만 관리)
+                        Card(
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                            )
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(12.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    Text(
-                                        text = "데이터 기록",
-                                        style = MaterialTheme.typography.titleSmall,
-                                        fontWeight = FontWeight.Medium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
+                                Text(
+                                    text = "데이터 기록",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+
+                                Text(
+                                    text = "기록 시작 버튼을 활성화 하려면 센서 활성화를 먼저 해주세요.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                
+                                Text(
+                                    text = "저장 경로 : 내 파일 -> 내장 저장공간 -> Download -> LinkBand",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                
+                                if (isRecording) {
+                    Button(
+                                        onClick = { onStopRecording() },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = MaterialTheme.colorScheme.error
+                                        )
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text("기록 중지")
+                                    }
                                     
-                                    Text(
-                                        text = "저장 경로 : 내 파일 -> 내장 저장공간 -> Download -> LinkBand",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                    
-                                    if (isRecording) {
-                        Button(
-                                            onClick = { onStopRecording() },
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.buttonColors(
-                                                containerColor = MaterialTheme.colorScheme.error
-                                            )
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.Close,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(16.dp)
-                                            )
-                                            Spacer(modifier = Modifier.width(4.dp))
-                                            Text("기록 중지")
-                                        }
-                                        
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.Favorite,
-                                                contentDescription = "기록 중",
-                                                tint = MaterialTheme.colorScheme.error,
-                                                modifier = Modifier.size(12.dp)
-                                            )
-                            Text(
-                                                text = "데이터가 실시간으로 CSV 및 JSON 파일에 저장되고 있습니다",
-                                                style = MaterialTheme.typography.bodySmall,
-                                                color = MaterialTheme.colorScheme.error
-                                            )
-                                        }
-                                    } else {
-                                        Button(
-                                            onClick = { onStartRecording() },
-                                            modifier = Modifier.fillMaxWidth()
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.PlayArrow,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(16.dp)
-                                            )
-                                            Spacer(modifier = Modifier.width(4.dp))
-                                            Text("기록 시작")
-                                        }
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Favorite,
+                                            contentDescription = "기록 중",
+                                            tint = MaterialTheme.colorScheme.error,
+                                            modifier = Modifier.size(12.dp)
+                                        )
+                        Text(
+                                            text = "데이터가 실시간으로 CSV 및 JSON 파일에 저장되고 있습니다",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.error
+                                        )
+                                    }
+                                } else {
+                                    Button(
+                                        onClick = { onStartRecording() },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        enabled = isConnected && isReceivingData
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.PlayArrow,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text("기록 시작")
                                     }
                                 }
                             }
@@ -790,6 +795,7 @@ fun FileListScreen(
     onFileClick: (java.io.File) -> Unit
 ) {
     var csvFiles by remember { mutableStateOf<List<java.io.File>>(emptyList()) }
+    var jsonFiles by remember { mutableStateOf<List<java.io.File>>(emptyList()) }
     val context = androidx.compose.ui.platform.LocalContext.current
     val clipboardManager = LocalClipboardManager.current
     
@@ -798,9 +804,13 @@ fun FileListScreen(
         val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
         val linkBandDir = java.io.File(downloadsDir, "LinkBand")
         if (linkBandDir.exists()) {
-            csvFiles = linkBandDir.listFiles { file ->
-                file.name.endsWith(".csv") && file.name.startsWith("LinkBand_")
-            }?.sortedByDescending { it.lastModified() } ?: emptyList()
+            // CSV 파일과 JSON 파일 모두 로드
+            val allFiles = linkBandDir.listFiles { file ->
+                (file.name.endsWith(".csv") || file.name.endsWith(".json")) && file.name.startsWith("LinkBand_")
+            } ?: emptyArray()
+            
+            csvFiles = allFiles.filter { it.name.endsWith(".csv") }.sortedByDescending { it.lastModified() }
+            jsonFiles = allFiles.filter { it.name.endsWith(".json") }.sortedByDescending { it.lastModified() }
         }
     }
     
@@ -810,117 +820,169 @@ fun FileListScreen(
             .padding(16.dp)
     ) {
         // 헤더
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier.fillMaxWidth()
         ) {
             Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "저장된 CSV 파일",
+                    text = "저장된 데이터 파일",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
                 
-                // Share 아이콘을 제목 오른쪽으로 이동
-                IconButton(
-                    onClick = {
-                        // "내 파일" 앱으로 직접 Downloads/LinkBand 폴더 열기
-                        val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                        val linkBandDir = java.io.File(downloadsDir, "LinkBand")
-                        
-                        // LinkBand 폴더가 없으면 생성
-                        if (!linkBandDir.exists()) {
-                            linkBandDir.mkdirs()
-                        }
-                        
-                        try {
-                            // 방법 1: 삼성 "내 파일" 앱 직접 실행
-                            val intent = Intent()
-                            intent.setClassName("com.sec.android.app.myfiles", "com.sec.android.app.myfiles.external.ui.MainActivity")
-                            intent.action = Intent.ACTION_VIEW
-                            intent.setDataAndType(Uri.fromFile(downloadsDir), "resource/folder")
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                            context.startActivity(intent)
-                        } catch (e1: Exception) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // Share 아이콘을 제목 오른쪽으로 이동
+                    IconButton(
+                        onClick = {
+                            // "내 파일" 앱으로 직접 Downloads/LinkBand 폴더 열기
+                            val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                            val linkBandDir = java.io.File(downloadsDir, "LinkBand")
+                            
+                            // LinkBand 폴더가 없으면 생성
+                            if (!linkBandDir.exists()) {
+                                linkBandDir.mkdirs()
+                            }
+                            
                             try {
-                                // 방법 2: 구글 "Files" 앱 직접 실행
+                                // 방법 1: 삼성 "내 파일" 앱 직접 실행
                                 val intent = Intent()
-                                intent.setClassName("com.google.android.apps.nbu.files", "com.google.android.apps.nbu.files.home.HomeActivity")
+                                intent.setClassName("com.sec.android.app.myfiles", "com.sec.android.app.myfiles.external.ui.MainActivity")
                                 intent.action = Intent.ACTION_VIEW
+                                intent.setDataAndType(Uri.fromFile(downloadsDir), "resource/folder")
                                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                 context.startActivity(intent)
-                            } catch (e2: Exception) {
+                            } catch (e1: Exception) {
                                 try {
-                                    // 방법 3: 일반적인 파일 관리자 (선택 없이)
-                                    val intent = Intent(Intent.ACTION_MAIN)
-                                    intent.addCategory(Intent.CATEGORY_APP_FILES)
+                                    // 방법 2: 구글 "Files" 앱 직접 실행
+                                    val intent = Intent()
+                                    intent.setClassName("com.google.android.apps.nbu.files", "com.google.android.apps.nbu.files.home.HomeActivity")
+                                    intent.action = Intent.ACTION_VIEW
                                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                     context.startActivity(intent)
-                                } catch (e3: Exception) {
+                                } catch (e2: Exception) {
                                     try {
-                                        // 방법 4: Downloads 관리자 직접 실행
-                                        val intent = Intent("android.intent.action.VIEW_DOWNLOADS")
+                                        // 방법 3: 일반적인 파일 관리자 (선택 없이)
+                                        val intent = Intent(Intent.ACTION_MAIN)
+                                        intent.addCategory(Intent.CATEGORY_APP_FILES)
                                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                         context.startActivity(intent)
-                                    } catch (e4: Exception) {
+                                    } catch (e3: Exception) {
                                         try {
-                                            // 방법 5: 시스템 문서 UI로 Downloads 폴더 열기
-                                            val intent = Intent(Intent.ACTION_VIEW)
-                                            intent.setDataAndType(
-                                                Uri.parse("content://com.android.externalstorage.documents/document/primary%3ADownload"),
-                                                "vnd.android.document/directory"
-                                            )
+                                            // 방법 4: Downloads 관리자 직접 실행
+                                            val intent = Intent("android.intent.action.VIEW_DOWNLOADS")
                                             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                             context.startActivity(intent)
-                                        } catch (e5: Exception) {
-                                            // 모든 방법 실패 - 사용자에게 안내
-                                            android.widget.Toast.makeText(
-                                                context,
-                                                "내 파일 앱을 열 수 없습니다.\n수동으로 이동하세요:\n내 파일 → Download → LinkBand",
-                                                android.widget.Toast.LENGTH_LONG
-                                            ).show()
+                                        } catch (e4: Exception) {
+                                            try {
+                                                // 방법 5: 시스템 문서 UI로 Downloads 폴더 열기
+                                                val intent = Intent(Intent.ACTION_VIEW)
+                                                intent.setDataAndType(
+                                                    Uri.parse("content://com.android.externalstorage.documents/document/primary%3ADownload"),
+                                                    "vnd.android.document/directory"
+                                                )
+                                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                                context.startActivity(intent)
+                                            } catch (e5: Exception) {
+                                                // 모든 방법 실패 - 사용자에게 안내
+                                                android.widget.Toast.makeText(
+                                                    context,
+                                                    "내 파일 앱을 열 수 없습니다.\n수동으로 이동하세요:\n내 파일 → Download → LinkBand",
+                                                    android.widget.Toast.LENGTH_LONG
+                                                ).show()
+                                            }
                                         }
                                     }
                                 }
                             }
-                        }
-                    },
-                    modifier = Modifier.combinedClickable(
-                        onClick = {
-                            // 일반 터치: 파일 관리자 열기 (위의 onClick과 동일)
                         },
-                        onLongClick = {
-                            // 길게 누르면 파일 경로를 클립보드에 복사
-                            val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                            val linkBandDir = java.io.File(downloadsDir, "LinkBand")
-                            clipboardManager.setText(AnnotatedString(linkBandDir.absolutePath))
-                            android.widget.Toast.makeText(
-                                context,
-                                "파일 경로가 클립보드에 복사되었습니다:\n${linkBandDir.absolutePath}",
-                                android.widget.Toast.LENGTH_LONG
-                            ).show()
-                        }
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Share,
-                        contentDescription = "내 파일 앱으로 Downloads/LinkBand 폴더 열기",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
+                        modifier = Modifier.combinedClickable(
+                            onClick = {
+                                // 일반 터치: 파일 관리자 열기 (위의 onClick과 동일)
+                            },
+                            onLongClick = {
+                                // 길게 누르면 파일 경로를 클립보드에 복사
+                                val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                                val linkBandDir = java.io.File(downloadsDir, "LinkBand")
+                                clipboardManager.setText(AnnotatedString(linkBandDir.absolutePath))
+                                android.widget.Toast.makeText(
+                                    context,
+                                    "파일 경로가 클립보드에 복사되었습니다:\n${linkBandDir.absolutePath}",
+                                    android.widget.Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Share,
+                            contentDescription = "내 파일 앱으로 Downloads/LinkBand 폴더 열기",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    
+                    TextButton(onClick = onBack) {
+                        Text("← 뒤로")
+                    }
                 }
             }
             
-            TextButton(onClick = onBack) {
-                Text("← 뒤로")
-            }
+            Text(
+                text = "저장 경로 : 내 파일 -> 내장 저장공간 -> Download -> LinkBand",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 4.dp)
+            )
         }
         
         Spacer(modifier = Modifier.height(16.dp))
         
-        if (csvFiles.isEmpty()) {
+        // CSV 파일 섹션
+        if (csvFiles.isNotEmpty()) {
+            Text(
+                text = "CSV 파일 (${csvFiles.size}개)",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.weight(1f)
+            ) {
+                items(csvFiles) { file ->
+                    CsvFileItem(file = file, onFileClick = onFileClick)
+                }
+            }
+        }
+        
+        // JSON 파일 섹션
+        if (jsonFiles.isNotEmpty()) {
+            if (csvFiles.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+            Text(
+                text = "JSON 파일 (${jsonFiles.size}개)",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.weight(if (csvFiles.isEmpty()) 1f else 0.5f)
+            ) {
+                items(jsonFiles) { file ->
+                    JsonFileItem(file = file, onFileClick = onFileClick)
+                }
+            }
+        }
+        
+        // 파일이 없을 때
+        if (csvFiles.isEmpty() && jsonFiles.isEmpty()) {
             Card(
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -936,7 +998,7 @@ fun FileListScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "저장된 CSV 파일이 없습니다",
+                        text = "저장된 데이터 파일이 없습니다",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Medium
                     )
@@ -946,14 +1008,6 @@ fun FileListScreen(
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                }
-            }
-        } else {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(csvFiles) { file ->
-                    CsvFileItem(file = file, onFileClick = onFileClick)
                 }
             }
         }
@@ -1015,7 +1069,7 @@ fun CsvFileItem(file: java.io.File, onFileClick: (java.io.File) -> Unit) {
                     file.name.contains("EEG") -> "📊 EEG"
                     file.name.contains("PPG") -> "🔴 PPG"
                     file.name.contains("ACC") -> "🚀 ACC"
-                    else -> "📄"
+                    else -> "📄 CSV"
                 }
                 
                 Text(
@@ -1033,7 +1087,82 @@ fun CsvFileItem(file: java.io.File, onFileClick: (java.io.File) -> Unit) {
             }
         }
     }
-} 
+}
+
+@Composable
+fun JsonFileItem(file: java.io.File, onFileClick: (java.io.File) -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = file.name,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 16.sp
+                    )
+                    
+                    Spacer(modifier = Modifier.height(4.dp))
+                    
+                    val fileSize = when {
+                        file.length() < 1024 -> "${file.length()} B"
+                        file.length() < 1024 * 1024 -> "${file.length() / 1024} KB"
+                        else -> "${"%.1f".format(file.length() / (1024.0 * 1024.0))} MB"
+                    }
+                    
+                    val lastModified = java.text.SimpleDateFormat(
+                        "yyyy-MM-dd HH:mm:ss", 
+                        java.util.Locale.getDefault()
+                    ).format(java.util.Date(file.lastModified()))
+                    
+                    Text(
+                        text = "크기: $fileSize",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    
+                    Text(
+                        text = "수정: $lastModified",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                
+                // 센서 타입 표시 (JSON 파일용)
+                val sensorType = when {
+                    file.name.contains("EEG") -> "📊 EEG"
+                    file.name.contains("PPG") -> "🔴 PPG"
+                    file.name.contains("ACC") -> "🚀 ACC"
+                    else -> "📋 JSON"
+                }
+                
+                Text(
+                    text = sensorType,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            
+            Button(
+                onClick = { onFileClick(file) },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("미리보기")
+            }
+        }
+    }
+}
 
 @Composable
 private fun SensorConfigRow(
