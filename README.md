@@ -37,7 +37,8 @@ LooxidLabs LinkBand 디바이스와의 Bluetooth 연결 및 센서 데이터 모
 - 실시간 모니터링
 
 ### 💾 데이터 관리
-- CSV 형식으로 센서 데이터 저장
+- CSV/JSON 형식으로 센서 데이터 저장
+- CSV/JSON 파일 미리보기
 
 ## 기술 스택
 
